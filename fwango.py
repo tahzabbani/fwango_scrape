@@ -35,7 +35,7 @@ driver.find_element(By.XPATH, "//*[@id=\"root\"]/span/div[1]/div/div[2]/div/div/
 sleep(1)
 
 driver.get("https://fwango.io/dashboard?sport=roundnet&period=past")
-WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, "TournamentCard__Container-sc-15zkmn8-0")))
+WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[class*='TournamentCard__Container']")))
 # soup = BeautifulSoup(driver.page_source, 'html.parser')
 # card_cont = soup.find_all("a", class_="TournamentCard__Container-sc-15zkmn8-0")
 # find the 'next' button using xpath
@@ -49,7 +49,7 @@ def retrieve_all_links():
     next_button_class = ""
     while ("is-disabled" not in next_button_class):
         # find each tournament card
-        card_list = driver.find_elements(By.CLASS_NAME, "TournamentCard__Container-sc-15zkmn8-0")
+        card_list = driver.find_elements(By.CSS_SELECTOR, "a[class*='TournamentCard__Container']")
         for i in card_list:
             href_list.append(i.get_attribute("href"))
         #  find the next button at the bottom
@@ -67,21 +67,35 @@ def retrieve_all_links():
         # WebDriverWait(driver, 20).until(EC.url_contains("page=" + current_page_num))
         # sleep(1)
 
-def retrieve_scores(hrefs):
-    for i in hrefs:
-        driver.get(i)
-        print(driver.current_url)
-        # waits for results button i think?
-        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//*[@id=\"root\"]/span/div[1]/div/div/div[2]/div/div[1]/div[2]/div/div/div/div/nav/ul[2]/li[2]/div/a")))
-        # click on results
-        driver.find_element(By.XPATH, "//*[@id=\"root\"]/span/div[1]/div/div/div[2]/div/div[1]/div[2]/div/div/div/div/nav/ul[2]/li[2]/div/a").click()
-        # wait until results title is located
-        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, "Resultsstyle__Header-sc-1nbbeg4-2 fNYACx")))
-
+def retrieve_scores():
+    
+    # for i in hrefs:
+    # driver.get(i)
+    driver.get("https://fwango.io/intersquid")
+    print(driver.current_url)
+    # waits for results button i think?
+    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//*[@id=\"root\"]/span/div[1]/div/div/div[2]/div/div[1]/div[2]/div/div/div/div/nav/ul[2]/li[2]/div/a")))
+    # click on results
+    driver.find_element(By.XPATH, "//*[@id=\"root\"]/span/div[1]/div/div/div[2]/div/div[1]/div[2]/div/div/div/div/nav/ul[2]/li[2]/div/a").click()
+    # wait until results title is located
+    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, "team-column")))
+    # find each team column
+    teams = driver.find_elements(By.CLASS_NAME, "team-column")
+    for i in teams[1:]:    
+        # for some reason, find_element wasn't working when applied on a webelement, so 
+        # using bs4 here to keep this data together for now
+        html = i.get_attribute('innerHTML')
+        soup = BeautifulSoup(html, 'html.parser')
+        team_name = soup.find('div', class_="team-name").get_text()
+        # team_name = i.find_element(By.CSS_SELECTOR, "div[class*='team-name']").text
+        # team_members = i.find_element(By.CLASS_NAME, "players").text
+        # print(team_name, team_members)
+        print(team_name)
     
 
-retrieve_all_links()
-retrieve_scores(href_list)
+# retrieve_all_links()
+# retrieve_scores(href_list)
+retrieve_scores()
 # print(href_list)
 # for i in href_list:
 #     driver.get(i)
