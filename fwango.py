@@ -1,5 +1,6 @@
 from time import sleep
 from typing import Type
+from click import option
 from selenium import webdriver
 # from selenium import webelements
 from selenium.webdriver.chrome.options import Options
@@ -48,8 +49,8 @@ def retrieve_all_links():
     global href_list
     next_button_class = ""
     while ("is-disabled" not in next_button_class):
-        # find each tournament card
-        card_list = driver.find_elements(By.CSS_SELECTOR, "a[class*='TournamentCard__Container']")
+        # find each tournament card with class starting with substring
+        card_list = driver.find_elements(By.CSS_SELECTOR, "a[class^='TournamentCard__Container']")
         for i in card_list:
             href_list.append(i.get_attribute("href"))
         #  find the next button at the bottom
@@ -68,29 +69,48 @@ def retrieve_all_links():
         # sleep(1)
 
 def retrieve_scores():
-    
     # for i in hrefs:
     # driver.get(i)
-    driver.get("https://fwango.io/intersquid")
+    driver.get("https://fwango.io/castatefinals")
     print(driver.current_url)
     # waits for results button i think?
     WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//*[@id=\"root\"]/span/div[1]/div/div/div[2]/div/div[1]/div[2]/div/div/div/div/nav/ul[2]/li[2]/div/a")))
     # click on results
     driver.find_element(By.XPATH, "//*[@id=\"root\"]/span/div[1]/div/div/div[2]/div/div[1]/div[2]/div/div/div/div/nav/ul[2]/li[2]/div/a").click()
     # wait until results title is located
-    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, "team-column")))
-    # find each team column
-    teams = driver.find_elements(By.CLASS_NAME, "team-column")
-    for i in teams[1:]:    
-        # for some reason, find_element wasn't working when applied on a webelement, so 
-        # using bs4 here to keep this data together for now
-        html = i.get_attribute('innerHTML')
-        soup = BeautifulSoup(html, 'html.parser')
-        team_name = soup.find('div', class_="team-name").get_text()
-        # team_name = i.find_element(By.CSS_SELECTOR, "div[class*='team-name']").text
-        # team_members = i.find_element(By.CLASS_NAME, "players").text
-        # print(team_name, team_members)
-        print(team_name)
+    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, "select-input-container")))
+    # select the dropdown with skill divisions
+    driver.find_element(By.CSS_SELECTOR, "div[class='select-input-container']").click()
+    # wait for drop down options to load
+    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[class$='menu']")))
+    menu = driver.find_element(By.CSS_SELECTOR, "div[class$='menu']")
+    options_list = menu.find_elements(By.CSS_SELECTOR, "div[class$='option']")
+    print(len(options_list))
+    # for i in range(1, len(options_list)):
+    #     print(i)
+    #     driver.find_element(By.CSS_SELECTOR, "div[class='select-input-container']").click()
+    #     # wait for drop down options to load
+    #     WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[class$='menu']")))
+    #     menu_temp = driver.find_element(By.CSS_SELECTOR, "div[class$='menu']")
+    #     options_list_temp = menu_temp.find_elements(By.CSS_SELECTOR, "div[class$='option']")
+    #     options_list_temp[i - 1].click()
+    #     WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, "team-column")))
+    #     # sleep(5)
+    #     # find each team column
+    #     teams = driver.find_elements(By.CLASS_NAME, "team-column")
+    #     for i in teams[1:]:    
+    #         # for some reason, find_element wasn't working when applied on a webelement, so 
+    #         # using bs4 here to keep this data together for now
+    #         html = i.get_attribute('innerHTML')
+    #         soup = BeautifulSoup(html, 'html.parser')
+    #         team_name = soup.find('div', class_="team-name").get_text()
+    #         # team_name = i.find_element(By.CSS_SELECTOR, "div[class*='team-name']").text
+    #         # team_members = i.find_element(By.CLASS_NAME, "players").text
+    #         # print(team_name, team_members)
+    #         print(team_name)
+    #         # for division in options_list:
+    
+
     
 
 # retrieve_all_links()
